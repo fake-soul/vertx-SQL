@@ -1,15 +1,13 @@
 package mysql;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.SQLClient;
-import io.vertx.mysqlclient.MySQLClient;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.mysqlclient.MySQLPool;
-import io.vertx.mysqlclient.impl.MySQLRowImpl;
 import io.vertx.sqlclient.PoolOptions;
-import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.SqlConnection;
+import io.vertx.sqlclient.Tuple;
+
+import java.util.ArrayList;
+import java.util.List;
 //import io.vertx.ext.asyncsql;
 
 /**
@@ -36,25 +34,61 @@ public class App
         MySQLPool client = MySQLPool.pool(connectOptions, poolOptions);
 
         // A simple query
-        client.query("SELECT * FROM users WHERE fname='raj'", ar -> {
-            if (ar.succeeded()) {
-                RowSet result = ar.result();
-                System.out.println("Got " + result.size() + " rows ");
-                System.out.println("data ");
+//        client.query("SELECT * FROM users WHERE fname='raj'", ar -> {
+//            if (ar.succeeded()) {
+//                RowSet result = ar.result();
+//                System.out.println("Got " + result.size() + " rows ");
+//                System.out.println("data ");
+//
+////                ar.result()
+//                for (Row row : result) {
+//                    System.out.println("User " + ((Integer) ((MySQLRowImpl) row).get(0)).intValue());
+//                    System.out.println("User " + ((String) ((MySQLRowImpl) row).get(1)).toString());
+//                    // ((Integer) ((MySQLRowImpl) row).get(0)).intValue()
+//                }
+//
+//
+//            } else {
+//                System.out.println("Failure: " + ar.cause().getMessage());
+//            }
+//
+//            // Now close the pool
+//            client.close();
+//        });
 
-//                ar.result()
-                for (Row row : result) {
-                    System.out.println("User " + ((Integer) ((MySQLRowImpl) row).get(0)).intValue());
-                    System.out.println("User " + ((String) ((MySQLRowImpl) row).get(1)).toString());
-                    // ((Integer) ((MySQLRowImpl) row).get(0)).intValue()
-                }
 
 
+
+        // Single
+//        client.preparedQuery("INSERT INTO users (id, fname) VALUES (?, ?)", Tuple.of(4323, "Viet"), ar -> {
+//            if (ar.succeeded()) {
+//                RowSet rows = ar.result();
+//                System.out.println(rows.rowCount());
+//            } else {
+//                System.out.println("Failure: " + ar.cause().getMessage());
+//            }
+//
+//            // Now close the pool
+//            client.close();
+//        });
+
+
+        // Multiple
+
+        List<Tuple> batch = new ArrayList<>();
+        batch.add(Tuple.of(2324, "Viet32"));
+        batch.add(Tuple.of(32341, "Ashi32"));
+
+// Execute the prepared batch
+        client.preparedBatch("INSERT INTO USERS (id, fname) VALUES (?, ?)", batch, res -> {
+            if (res.succeeded()) {
+
+                // Process rows
+                RowSet rows = res.result();
             } else {
-                System.out.println("Failure: " + ar.cause().getMessage());
+                System.out.println("Batch failed " + res.cause());
             }
 
-            // Now close the pool
             client.close();
         });
 
